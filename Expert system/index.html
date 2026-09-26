@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sistema experto">
+    <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&
+    display=swap">
+    <link rel="stylesheet" href="css/styles.css">
+    <title>Sistema Experto en Diagnóstico de Suspensión Mazda</title>
+    <script src="js/script.js" defer></script>
+</head>
+<body>
+
+<!-- ==========================================================
+    SPRITE DE ICONOS (Lucide, licencia ISC)
+    Se referencian con <svg><use href="#icon-nombre"></use></svg>
+========================================================== -->
+
+    <svg class="sprite" aria-hidden="true" focusable="false">
+    <symbol id="icon-wrench" viewBox="0 0 24 24">
+        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+    </symbol>
+    <symbol id="icon-arrow-left" viewBox="0 0 24 24">
+        <path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>
+    </symbol>
+    <symbol id="icon-file-text" viewBox="0 0 24 24">
+        <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>
+    </symbol>
+    <symbol id="icon-alert-circle" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>
+    </symbol>
+    <symbol id="icon-check-circle" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>
+    </symbol>
+    <symbol id="icon-book-open" viewBox="0 0 24 24">
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+    </symbol>
+    <symbol id="icon-workflow" viewBox="0 0 24 24">
+        <rect width="8" height="8" x="3" y="3" rx="2"/><path d="M7 11v4a2 2 0 0 0 2 2h4"/><rect width="8" height="8" x="13" y="13" rx="2"/>
+    </symbol>
+    <symbol id="icon-code" viewBox="0 0 24 24">
+        <path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/>
+    </symbol>
+    <symbol id="icon-cpu" viewBox="0 0 24 24">
+        <rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/>
+    </symbol>
+    <symbol id="icon-moon" viewBox="0 0 24 24">
+        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+    </symbol>
+    <symbol id="icon-sun" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+    </symbol>
+    </svg>
+
+<!-- Selector de tema claro / oscuro -->
+    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Cambiar a modo oscuro" aria-pressed="false">
+    <svg class="icon theme-toggle__moon" aria-hidden="true"><use href="#icon-moon"></use></svg>
+    <svg class="icon theme-toggle__sun" aria-hidden="true"><use href="#icon-sun"></use></svg>
+    </button>
+
+    <main class="page">
+
+<!-- ==========================================================
+    VISTA 1: DIAGNÓSTICO
+    El contenido se genera en #app a partir de los <template>.
+========================================================== -->
+    <section class="view" id="view-diagnostic" aria-label="Diagnóstico de suspensión">
+        <div class="container" id="app" aria-live="polite"></div>
+    </section>
+
+    <!-- ==========================================================
+    VISTA 2: SISTEMA DE REGLAS (se muestra con #reglas)
+    ========================================================== -->
+    <section class="view" id="view-rules" aria-labelledby="rules-title" hidden>
+        <div class="container rules">
+
+        <!-- Encabezado de la página de reglas -->
+        <header class="rules__header">
+            <a class="btn btn--outline btn--md" href="#inicio">
+            <svg class="icon" aria-hidden="true"><use href="#icon-arrow-left"></use></svg>
+            Volver
+            </a>
+            <div class="rules__heading">
+            <h1 class="rules__title" id="rules-title" tabindex="-1">Sistema de Reglas Lógicas</h1>
+            <p class="rules__subtitle">Estructura del motor de inferencia y base de conocimiento</p>
+            </div>
+        </header>
+
+        <!-- Diagrama de árbol -->
+        <article class="card card--panel">
+            <header class="panel__header panel__header--brand">
+            <div class="panel__icon-box">
+                <svg class="icon panel__icon panel__icon--primary" aria-hidden="true"><use href="#icon-workflow"></use></svg>
+            </div>
+            <div>
+                <h2 class="panel__title">Diagrama de Árbol de Decisión</h2>
+                <p class="panel__description">Visualización completa del flujo de diagnóstico</p>
+            </div>
+            </header>
+            <div class="panel__body panel__body--muted">
+            <img class="diagram" src="assets/imgs/diagrama-arbol.png" alt="Diagrama de árbol con las reglas de diagnóstico de bujes, amortiguadores, fugas y rótulas" loading="lazy">
+            </div>
+        </article>
+
+        <!-- Reglas lógicas -->
+        <article class="card card--panel">
+            <header class="panel__header">
+            <div class="panel__icon-box panel__icon-box--bordered">
+                <svg class="icon panel__icon panel__icon--accent" aria-hidden="true"><use href="#icon-book-open"></use></svg>
+            </div>
+            <div>
+                <h2 class="panel__title">Reglas Lógicas Implementadas</h2>
+                <p class="panel__description">Formato: <strong>Si [premisa] entonces [conclusión]</strong></p>
+            </div>
+            </header>
+
+            <div class="panel__body rule-list">
+
+            <!-- Regla 1 - Bujes (Conector Y) -->
+            <section class="rule rule--orange" aria-labelledby="rule-1">
+                <div class="rule__head">
+                <div class="rule__badges">
+                    <span class="badge badge--rule-outline">REGLA 1</span>
+                    <span class="badge badge--rule-solid">CONECTOR Y (∧)</span>
+                </div>
+                <h3 class="rule__name" id="rule-1">Diagnóstico de Bujes</h3>
+                </div>
+                <div class="rule__body">
+                <p><strong class="rule__kw">Si</strong> (Vibración/ruido metálico) <strong class="rule__kw">Y</strong> (Bujes con grietas o juego excesivo)</p>
+                <p><strong class="rule__kw">Entonces</strong> Falla confirmada en bujes</p>
+                <div class="logic-box">
+                    <p><strong>Equivalencia lógica:</strong> p ∧ q → r (p Y q implica r)</p>
+                </div>
+                </div>
+            </section>
+
+            <!-- Regla 2 - Amortiguador defectuoso (Conector Y) -->
+            <section class="rule rule--blue" aria-labelledby="rule-2">
+                <div class="rule__head">
+                <div class="rule__badges">
+                    <span class="badge badge--rule-outline">REGLA 2</span>
+                    <span class="badge badge--rule-solid">CONECTOR Y (∧)</span>
+                </div>
+                <h3 class="rule__name" id="rule-2">Diagnóstico de Amortiguador Defectuoso</h3>
+                </div>
+                <div class="rule__body">
+                <p><strong class="rule__kw">Si</strong> (Golpeteo al pasar baches) <strong class="rule__kw">Y</strong> (Rebote excesivo) <strong class="rule__kw">Y</strong> (Sin resistencia al comprimir)</p>
+                <p><strong class="rule__kw">Entonces</strong> Amortiguador defectuoso</p>
+                <div class="logic-box">
+                    <p><strong>Equivalencia lógica:</strong> p ∧ q ∧ s → r (múltiples condiciones con Y)</p>
+                </div>
+                </div>
+            </section>
+
+            <!-- Regla 3 - Fuga en amortiguador (Conector O) -->
+            <section class="rule rule--cyan" aria-labelledby="rule-3">
+                <div class="rule__head">
+                <div class="rule__badges">
+                    <span class="badge badge--rule-outline">REGLA 3</span>
+                    <span class="badge badge--rule-solid">CONECTOR O (∨)</span>
+                </div>
+                <h3 class="rule__name" id="rule-3">Diagnóstico de Fuga en Amortiguador</h3>
+                </div>
+                <div class="rule__body">
+                <p><strong class="rule__kw">Si</strong> (Vehículo se inclina hacia un lado) <strong class="rule__kw">Y</strong> (Presencia de aceite <strong class="rule__kw">O</strong> fuga visible)</p>
+                <p><strong class="rule__kw">Entonces</strong> Fuga confirmada en amortiguador</p>
+                <div class="logic-box">
+                    <p><strong>Equivalencia lógica:</strong> p ∧ (q ∨ r) → s (combinación de Y y O)</p>
+                </div>
+                </div>
+            </section>
+
+            <!-- Regla 4 - Rótula dañada (Conector O) -->
+            <section class="rule rule--green" aria-labelledby="rule-4">
+                <div class="rule__head">
+                <div class="rule__badges">
+                    <span class="badge badge--rule-outline">REGLA 4</span>
+                    <span class="badge badge--rule-solid">CONECTOR O (∨)</span>
+                </div>
+                <h3 class="rule__name" id="rule-4">Diagnóstico de Rótula Dañada</h3>
+                </div>
+                <div class="rule__body">
+                <p><strong class="rule__kw">Si</strong> (Dificultad para controlar) <strong class="rule__kw">Y</strong> (Juego axial <strong class="rule__kw">O</strong> juego radial)</p>
+                <p><strong class="rule__kw">Entonces</strong> Rótula dañada</p>
+                <div class="logic-box">
+                    <p><strong>Equivalencia lógica:</strong> p ∧ (q ∨ r) → s (p es suficiente para s dado q o r)</p>
+                </div>
+                </div>
+            </section>
+
+            <!-- Regla 5 - Silogismo -->
+            <section class="rule rule--purple" aria-labelledby="rule-5">
+                <div class="rule__head">
+                <div class="rule__badges">
+                    <span class="badge badge--rule-outline">REGLA 5</span>
+                    <span class="badge badge--rule-solid">SILOGISMO</span>
+                </div>
+                <h3 class="rule__name" id="rule-5">Clasificación por Silogismo - Tipo S</h3>
+                </div>
+                <div class="rule__body rule__body--loose">
+                <p><strong class="rule__kw">Premisa Mayor:</strong> Si hay golpeteo → entonces P</p>
+                <p><strong class="rule__kw">Premisa Menor:</strong> Si el amortiguador tiene fuga → entonces S</p>
+                <p><strong class="rule__kw">Conclusión:</strong> Por lo tanto, si (Golpeteo <strong>Y</strong> Fuga) → el amortiguador es de tipo S</p>
+                <div class="logic-box logic-box--stack">
+                    <p><strong>Forma silogística:</strong> (p → q) ∧ (x → s) ∧ (p ∧ x) → (tipo S)</p>
+                    <p class="logic-box__note"><strong>Interpretación:</strong> Cualquier amortiguador que presente golpeteo Y fuga es clasificado como tipo S</p>
+                </div>
+                </div>
+            </section>
+
+            </div>
+        </article>
+
+        <!-- Conectores lógicos + Motor de inferencia -->
+        <div class="rules__grid">
+            <article class="card card--panel card--soft">
+            <header class="panel__header panel__header--compact">
+                <div class="panel__inline-title">
+                <svg class="icon panel__icon-sm" aria-hidden="true"><use href="#icon-code"></use></svg>
+                <h2 class="panel__title panel__title--sm">Conectores Lógicos</h2>
+                </div>
+            </header>
+            <div class="panel__body panel__body--compact">
+                <div class="connector rule--orange">
+                <h3 class="connector__title">Conjunción (Y / ∧)</h3>
+                <p class="connector__text">Reglas 1, 2, 4, 5. Requiere que todas las condiciones sean verdaderas simultáneamente.</p>
+                </div>
+                <div class="connector rule--cyan">
+                <h3 class="connector__title">Disyunción (O / ∨)</h3>
+                <p class="connector__text">Reglas 3 y 4. Requiere que al menos una de las condiciones sea verdadera.</p>
+                </div>
+            </div>
+            </article>
+
+            <article class="card card--panel card--soft">
+            <header class="panel__header panel__header--compact">
+                <div class="panel__inline-title">
+                <svg class="icon panel__icon-sm" aria-hidden="true"><use href="#icon-cpu"></use></svg>
+                <h2 class="panel__title panel__title--sm">Motor de Inferencia</h2>
+                </div>
+                <p class="panel__description panel__description--sm">Forward Chaining (Encadenamiento hacia adelante)</p>
+            </header>
+            <div class="panel__body panel__body--compact">
+                <div class="callout callout--compact">
+                <h3 class="callout__label callout__label--strong">Funcionamiento:</h3>
+                <ol class="steps">
+                    <li>Presenta preguntas secuenciales al usuario</li>
+                    <li>Cada respuesta activa reglas en la base de conocimiento</li>
+                    <li>Las reglas se evalúan verificando sus premisas</li>
+                    <li>Si una regla se cumple, ejecuta su conclusión</li>
+                    <li>Continúa hasta alcanzar conclusión final</li>
+                    <li>Mantiene historial para trazabilidad</li>
+                </ol>
+                </div>
+            </div>
+            </article>
+        </div>
+
+        <!-- Equivalencias lógicas -->
+        <article class="card card--panel">
+            <header class="panel__header panel__header--stacked">
+            <h2 class="panel__title">Equivalencias Lógicas Implementadas</h2>
+            <p class="panel__description">Formas lógicas utilizadas en las reglas</p>
+            </header>
+            <div class="panel__body equivalences">
+            <div class="equivalence">
+                <p class="equivalence__form">p → q</p>
+                <p class="equivalence__meaning">"Si p entonces q"</p>
+                <p class="equivalence__usage">Todas las reglas usan esta forma base</p>
+            </div>
+            <div class="equivalence">
+                <p class="equivalence__form">p solo si q</p>
+                <p class="equivalence__meaning">La condición p requiere q</p>
+                <p class="equivalence__usage">Reglas de verificación física</p>
+            </div>
+            <div class="equivalence">
+                <p class="equivalence__form">q si p</p>
+                <p class="equivalence__meaning">Si ocurre p, entonces ocurre q</p>
+                <p class="equivalence__usage">Todas las conclusiones diagnósticas</p>
+            </div>
+            <div class="equivalence">
+                <p class="equivalence__form">p es suficiente para q</p>
+                <p class="equivalence__meaning">p por sí solo garantiza q</p>
+                <p class="equivalence__usage">Reglas de confirmación de fallas</p>
+            </div>
+            </div>
+        </article>
+
+        </div>
+    </section>
+    </main>
+
+<!-- ==============================================================
+    PLANTILLAS.
+    Los textos dinámicos se insertan en los nodos [data-slot].
+============================================================== -->
+
+    <!-- Pantalla de inicio -->
+    <template id="tpl-start">
+    <article class="card card--hero animate-in">
+        <header class="hero">
+        <div class="hero__icon-wrap">
+            <svg class="icon hero__icon" aria-hidden="true"><use href="#icon-wrench"></use></svg>
+        </div>
+        <h1 class="hero__title" tabindex="-1" data-focus>Sistema Experto de Diagnóstico</h1>
+        <p class="hero__subtitle">Suspensión Mazda - Motor de Inferencia Lógica</p>
+        </header>
+        <div class="hero__body">
+        <div class="info-box">
+            <p>Este sistema experto utiliza <strong>reglas lógicas</strong> con encadenamiento hacia adelante para diagnosticar problemas en el sistema de suspensión mediante preguntas estructuradas.</p>
+        </div>
+        <div class="stack">
+            <button class="btn btn--primary btn--xl btn--block" type="button" data-action="start">Comenzar Diagnóstico</button>
+            <a class="btn btn--outline btn--xl btn--block" href="#reglas">
+            <svg class="icon icon--md" aria-hidden="true"><use href="#icon-file-text"></use></svg>
+            Ver Reglas del Sistema
+            </a>
+        </div>
+        </div>
+    </article>
+    </template>
+
+    <!-- Tarjeta de pregunta -->
+    <template id="tpl-question">
+    <article class="card animate-in">
+        <header class="card__header card__header--roomy">
+        <span class="badge badge--accent badge--mono" data-slot="badge"></span>
+        <h2 class="card__title" tabindex="-1" data-focus data-slot="title"></h2>
+        <p class="card__description" data-slot="description"></p>
+        </header>
+        <div class="card__content">
+        <div class="btn-grid">
+            <button class="btn btn--primary btn--lg" type="button" data-action="yes">Sí</button>
+            <button class="btn btn--outline btn--lg" type="button" data-action="no">No</button>
+        </div>
+        <button class="btn btn--ghost btn--block" type="button" data-action="home">
+            <svg class="icon" aria-hidden="true"><use href="#icon-arrow-left"></use></svg>
+            Volver al inicio
+        </button>
+        </div>
+    </article>
+    </template>
+
+    <!-- Tarjeta de diagnóstico preliminar -->
+    <template id="tpl-diagnosis">
+    <article class="card card--diagnosis animate-in">
+        <header class="card__header">
+        <span class="badge badge--muted">DIAGNÓSTICO PRELIMINAR</span>
+        <h2 class="card__title" tabindex="-1" data-focus data-slot="title"></h2>
+        </header>
+        <div class="card__content">
+        <div class="callout">
+            <p class="callout__label">Recomendación:</p>
+            <p class="callout__text" data-slot="recommendation"></p>
+        </div>
+        <div class="prompt">
+            <p class="prompt__question" data-slot="question"></p>
+            <div class="btn-grid">
+            <button class="btn btn--primary btn--lg" type="button" data-action="yes">Sí</button>
+            <button class="btn btn--outline btn--lg" type="button" data-action="no">No</button>
+            </div>
+        </div>
+        <button class="btn btn--ghost btn--block" type="button" data-action="home">
+            <svg class="icon" aria-hidden="true"><use href="#icon-arrow-left"></use></svg>
+            Volver al inicio
+        </button>
+        </div>
+    </article>
+    </template>
+
+    <!-- Tarjeta de resultado (falla confirmada) -->
+    <template id="tpl-result">
+    <article class="card card--result card--failure animate-in">
+        <header class="card__header card__header--roomy">
+        <div class="result__status">
+            <svg class="icon result__icon" aria-hidden="true"><use href="#icon-alert-circle"></use></svg>
+            <span class="badge badge--destructive badge--lg">FALLA CONFIRMADA</span>
+        </div>
+        <h2 class="card__title card__title--xl result__title" tabindex="-1" data-focus data-slot="title"></h2>
+        </header>
+        <div class="card__content">
+        <div class="conditions">
+            <p class="conditions__label">Condiciones deducidas:</p>
+            <ul class="conditions__list" data-slot="conditions"></ul>
+        </div>
+        <div class="trace">
+            <p class="trace__label">Reglas activadas por el motor de inferencia:</p>
+            <ul class="trace__list" data-slot="trace"></ul>
+        </div>
+        <div class="callout">
+            <p class="callout__label">Recomendación:</p>
+            <p class="callout__text callout__text--medium" data-slot="recommendation"></p>
+        </div>
+        <button class="btn btn--primary btn--lg btn--block" type="button" data-action="home">
+            <svg class="icon" aria-hidden="true"><use href="#icon-arrow-left"></use></svg>
+            Volver al inicio
+        </button>
+        </div>
+    </article>
+    </template>
+
+    <!-- Tarjeta sin falla detectada -->
+    <template id="tpl-no-issue">
+    <article class="card card--success animate-in">
+        <header class="card__header">
+        <div class="result__status">
+            <svg class="icon result__icon result__icon--ok" aria-hidden="true"><use href="#icon-check-circle"></use></svg>
+            <span class="badge badge--accent badge--lg">SIN FALLA DETECTADA</span>
+        </div>
+        <h2 class="card__title card__title--xl" tabindex="-1" data-focus>No se detectó ninguna falla</h2>
+        </header>
+        <div class="card__content">
+        <div class="summary-box">
+            <p>Con los síntomas evaluados, no se ha confirmado una falla específica en el sistema de suspensión.</p>
+        </div>
+        <div class="callout">
+            <p class="callout__label">Recomendación General:</p>
+            <p class="callout__text">Seguir el flujo de diagnóstico completo si los síntomas persisten. Realizar inspección visual general de la suspensión.</p>
+        </div>
+        <button class="btn btn--primary btn--lg btn--block" type="button" data-action="home">
+            <svg class="icon" aria-hidden="true"><use href="#icon-arrow-left"></use></svg>
+            Volver al inicio
+        </button>
+        </div>
+    </article>
+    </template>
+
+    <!-- Elemento de lista con icono de verificación -->
+    <template id="tpl-condition-item">
+    <li class="conditions__item">
+        <svg class="icon conditions__icon" aria-hidden="true"><use href="#icon-check-circle"></use></svg>
+        <span data-slot="text"></span>
+    </li>
+    </template>
+</body>
+</html>
